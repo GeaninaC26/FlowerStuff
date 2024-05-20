@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Catalog</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+       function load_flowers(flowers){
+        console.log(flowers);
+          for (var i = 0; i < flowers.length; i++) {
+            if (i % 3 == 0) {
+              $("#flowers").append("<tr>");
+            }
+            var flower = flowers[i];
+            var cell = "<td class='flower_cell'><table>";
+            cell += "<tr><td colspan='2' rowspan='2'><img class='flower_image' src='img/flowers/" + flower.poza + "'></td>";
+            cell += "<td class='flower_description' colspan='2' rowspan='4'>" + flower.descriere + "</td></tr>";
+            cell += "<tr></tr>";
+            cell += "<tr><td><h4>Nume</h4></td><td>" + flower.nume + "</td></tr>";
+            cell += "<tr><td><h4>Wiki</h4></td><td><a href= " + flower.link + "><img class='wiki_image' src='img/wiki.png'></img></a></td></tr>";
+            cell += "</table></td>";
+            $("#flowers").append(cell);
+            if (i % 3 == 2) {
+              $("#flowers").append("</tr>");
+            }
+          }
+       }
+
+       $(document).ready(function(){
+        $("header").load("components/header.html");
+        $("footer").load("components/footer.html");
+        $.ajax({
+          url: "http://localhost:9090/api/flower",
+          type: "GET",
+          success: function(data) {
+            load_flowers(data);
+          },
+          error: function() {
+            alert("Error loading flowers");
+          }
+        });
+        
+        // Function to open modal
+        function openModal(imageUrl) {
+          $("#modal-image").attr("src", imageUrl);
+          $("#modal").css("display", "block");
+        }
+        
+        // Function to close modal
+        $(".close").click(function() {
+          $("#modal").css("display", "none");
+        });
+
+        // Click event to open modal when clicking on flower image
+        $("#flowers").on("click", ".flower_image", function() {
+          var imageUrl = $(this).attr("src");
+          openModal(imageUrl);
+        });
+        
+      });
+
+    </script>
+</head>
+<body>
+  <header></header>
+  <main>
+    <table id="flowers"></table>
+  </main>
+  <div id="modal" class="modal">
+    <span class="close">&times;</span>
+    <div class="image-container">
+    <img id="modal-image" class="modal-content" src="/img/articles/article2.jpg" alt="Modal Image">
+  </div>
+  </div>
+  
+  <footer></footer>
+</body>
+
+</html>

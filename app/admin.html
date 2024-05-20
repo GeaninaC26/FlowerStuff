@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        function logout() {
+            $.ajax({
+                url: "/api/logout",
+                type: "POST",
+                success: function(data) {
+                    window.location.href = "/";
+                },
+                error: function() {
+                    alert("Error logging out");
+                }
+            });
+        }   
+
+        function load_users(users) {
+            $("#users").append("<tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>City</th><th>County</th></tr>");
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var row = "<tr>";
+                row += "<td>" + user.nume + "</td>";
+                row += "<td>" + user.email + "</td>";
+                row += "<td>" + user.phone + "</td>";
+                row += "<td>" + user.address + "</td>";
+                row += "<td>" + user.city_name + "</td>";
+                row += "<td>" + user.county_name + "</td>";
+                row += "</tr>";
+                $("#users").append(row);
+            }
+        }
+
+        $(document).ready(function() {
+            $("footer").load("components/footer.html");
+            console.log("Loaded footer");
+
+            $(document).on('click', '#users th', function() {
+                var table = $(this).parents('table').eq(0);
+                var rows = table.find('tr:gt(0)').toArray().sort(compareRows($(this).index()));
+                this.asc = !this.asc;
+                if (!this.asc) { rows = rows.reverse(); }
+                for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
+            });
+
+            // Compare function for sorting
+            function compareRows(index) {
+                return function(a, b) {
+                    var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB);
+                };
+            }
+
+            // Get cell value for comparison
+            function getCellValue(row, index) {
+                return $(row).children('td').eq(index).text();
+            }
+
+            // Function to handle search
+            $("#searchTerm").on("input", function() {
+                var searchTerm = $(this).val();
+                if (searchTerm != "") {
+                    // Perform search using AJAX
+                    $.ajax({
+                        url: "http://localhost:9090/api/users",
+                        type: "GET",
+                        data: { search: searchTerm }, // Send search term as a query parameter
+                        success: function(data) {
+                            $("#users").empty(); // Clear previous results
+                            load_users(data);
+                        },
+                        error: function() {
+                            alert("Error searching users");
+                        }
+                    });
+                } else {
+                    // If search term is empty, show all users
+                    $.ajax({
+                        url: "http://localhost:9090/api/users",
+                        type: "GET",
+                        success: function(data) {
+                            $("#users").empty(); // Clear previous results
+                            
+                            load_users(data);
+                        },
+                        error: function() {
+                            alert("Error loading users");
+                        }
+                    });
+                }
+            });
+
+            // Fetch users initially
+            $.ajax({
+                url: "http://localhost:9090/api/users",
+                type: "GET",
+                success: function(data) {
+                    load_users(data);
+                },
+                error: function() {
+                    alert("Error loading users");
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <a class="logout" onclick="logout()">Logout</a>
+    <!-- Search bar and button -->
+    <div class="search-container">
+        <input type="text" id="searchTerm" placeholder="Search...">
+    </div>
+    <!-- Table to display users -->
+    <div class="admin">
+        <table id="users"></table>
+    </div>
+    <footer></footer>
+</body>
+</html>

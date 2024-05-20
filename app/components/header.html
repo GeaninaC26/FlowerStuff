@@ -1,0 +1,21 @@
+<script>
+    function logout() {
+        $.ajax({
+            url: "/api/logout",
+            type: "POST",
+            success: function(data) {
+                window.location.href = "/";
+            },
+            error: function() {
+                alert("Error logging out");
+            }
+        });
+    }
+</script>
+
+<a class="navtext" href="/">Home</a>
+<a class="navtext" href="/catalog">Catalog</a>
+<a class="navtext" href="/tips">Tips and Tricks</a>
+<a class="navtext" href="/care">Care Guide</a>
+<a class="navtext" onclick="logout()">Logout</a>
+<hr class="line">

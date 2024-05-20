@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Catalog</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+          function load_articles(article){
+          // Loop through each article in the array
+            for(var i = 0; i < article.length; i++){
+              $("#tips_tricks").append("<li><div class='article'><img class='article_image' src='img/articles/" + article[i].poza + "'><b class='article_title'>" + article[i].titlu + "</b></div><p class='article_content'>" + article[i].text + "</p></li>");
+              }
+          }
+            $(document).ready(function(){
+            $("header").load("components/header.html");
+            $("footer").load("components/footer.html");
+          
+            $.ajax({
+              url: "http://localhost:9090/api/tips",
+              type: "GET",
+              success: function(data) {
+                load_articles(data);
+                var t = $("#tips_tricks").children().length;
+            if (t > 2) {
+              $("#tips_tricks").append('<a class="see">See more</a>');
+              $("#tips_tricks").find('li').slice(2).hide();
+            }
+            $("#tips_tricks").on("click", ".see", function(){
+              $(this).siblings("li").show();
+              $(this).remove();
+              $("#tips_tricks").append('<a class="unsee">See less</a>');
+            });
+            $("#tips_tricks").on("click", ".unsee", function(){
+              $("#tips_tricks").append('<a class="see">See more</a>');
+              $("#tips_tricks").find('li').slice(2).hide();
+              $(this).remove();
+            });
+            $(".article_content").hide();
+            $("#tips_tricks").on("click", ".article", function(){
+              $(this).siblings(".article_content").slideToggle();
+            });
+              },
+              error: function() {
+                alert("Error loading articles");
+              }
+            });
+
+            
+        });
+    </script>
+</head>
+<body>
+  <header></header>
+  <main>
+    <ul id="tips_tricks"></ul>
+  </main>
+  <footer></footer>
+</body>
+
+</html>

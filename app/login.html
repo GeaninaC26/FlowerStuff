@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        function login() {
+            var email = $("input[name='email']").val();
+            var password = $("input[name='password']").val();
+            if (email == "" || password == "") {
+                alert("All fields are required!");
+                return;
+            }
+            sha256(password)
+                .then(function(hash) {
+                    password_hash = hash;
+                    $.ajax({
+                    url: "http://localhost:9090/api/login",
+                    type: "POST",
+                    data: JSON.stringify({
+                        email: email,
+                        password_hash: password_hash
+                    }),
+                    success: function(data) {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            alert("Login successful");
+                            window.location.href = "/";
+                        }
+                    },
+                    error: function() {
+                        alert("Error loading users");
+                    }
+                    })
+                });
+        }
+        async function sha256(password) {
+        // encode as UTF-8
+        const msgBuffer = new TextEncoder().encode(password);                    
+
+        // hash the message
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+        // convert ArrayBuffer to Array
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+        // convert bytes to hex string                  
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+        }
+    </script>
+</head>
+<body>
+    <div class="login">
+        <h1>Login page</h1>
+        <form>
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email"  required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"  required>
+        </form>
+        <button class="submit" onclick="login()">Login</button>
+        <p>Don't have an account? <a href="register">Register</a></p>
+    </div>
+    <footer></footer>
+</body>
+</html>
